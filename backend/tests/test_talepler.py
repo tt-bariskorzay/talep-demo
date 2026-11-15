@@ -28,6 +28,17 @@ def test_bozuk_istek_400_doner(client):
     assert yanit.status_code == 400
 
 
+def test_oncelik_secilmezse_normal_olur(client):
+    gonder(client, {"baslik": "Öncelik seçilmedi"})
+    assert Talep.objects.get().oncelik == "Normal"
+
+
+def test_oncelik_yanitta_doner(client):
+    yanit = gonder(client, {"baslik": "Sunucu kapalı", "oncelik": "Yüksek"})
+    assert yanit.status_code == 201
+    assert yanit.json()["oncelik"] == "Yüksek"
+
+
 def test_talepler_listelenir(client):
     Talep.objects.create(baslik="Birinci")
     Talep.objects.create(baslik="İkinci")

@@ -3,7 +3,7 @@ import { onMounted, reactive, ref } from "vue";
 
 const ortam = ref({ ortam: "…", surum: "…" });
 const talepler = ref([]);
-const form = reactive({ baslik: "", aciklama: "" });
+const form = reactive({ baslik: "", aciklama: "", oncelik: "Normal" });
 const hata = ref("");
 
 async function yukle() {
@@ -24,6 +24,7 @@ async function gonder() {
   }
   form.baslik = "";
   form.aciklama = "";
+  form.oncelik = "Normal";
   await yukle();
 }
 
@@ -41,6 +42,13 @@ onMounted(yukle);
     <form @submit.prevent="gonder">
       <label>Başlık <input v-model="form.baslik" required /></label>
       <label>Açıklama <textarea v-model="form.aciklama" rows="3"></textarea></label>
+      <label>Öncelik
+        <select v-model="form.oncelik">
+          <option>Düşük</option>
+          <option>Normal</option>
+          <option>Yüksek</option>
+        </select>
+      </label>
       <p v-if="hata" class="hata">{{ hata }}</p>
       <button type="submit">Talebi kaydet</button>
     </form>
@@ -48,6 +56,7 @@ onMounted(yukle);
     <h2>Son talepler</h2>
     <ul>
       <li v-for="t in talepler" :key="t.id">
+        <span v-if="t.oncelik" :class="['rozet', t.oncelik]">{{ t.oncelik }}</span>
         <strong>{{ t.baslik }}</strong>
         <span v-if="t.aciklama"> · {{ t.aciklama }}</span>
       </li>
@@ -65,6 +74,9 @@ form { display: flex; flex-direction: column; gap: 14px; background: #EEF3F7; pa
 label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 18px; }
 input, textarea, select { font: inherit; font-weight: 400; padding: 8px; border: 1px solid #C9D3DD; }
 button { align-self: flex-start; font: inherit; padding: 10px 18px; background: #002855; color: #fff; border: 0; cursor: pointer; }
+.rozet { display: inline-block; min-width: 64px; margin-right: 10px; padding: 2px 8px; font-size: 14px; text-align: center; background: #EEF3F7; }
+.rozet.Yüksek { background: #FBE9E7; color: #D42B1C; }
+.rozet.Düşük { color: #4A5B70; }
 .hata { color: #D42B1C; margin: 0; }
 li { padding: 6px 0; font-size: 18px; }
 </style>
