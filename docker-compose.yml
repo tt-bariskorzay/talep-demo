@@ -1,0 +1,43 @@
+# Tek dosya, iki ortam: test ve prod aynı makinede ayrı proje adıyla çalışır.
+#   docker compose -p talep-test --env-file deploy/test.env up -d
+#   docker compose -p talep-prod --env-file deploy/prod.env up -d
+# Yerelde imajları kaynaktan üretmek için: docker compose up -d --build
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: talep
+      POSTGRES_USER: talep
+      POSTGRES_PASSWORD: ${DB_SIFRE:-yerel}
+    volumes:
+      - veri:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U talep -d talep"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    image: ${REGISTRY:-talep}/talep-backend:${SURUM:-yerel}
+    build: ./backend
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: talep
+      POSTGRES_USER: talep
+      POSTGRES_PASSWORD: ${DB_SIFRE:-yerel}
+      ORTAM: ${ORTAM:-yerel}
+      SURUM: ${SURUM:-yerel}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: ${REGISTRY:-talep}/talep-frontend:${SURUM:-yerel}
+    build: ./frontend
+    ports:
+      - "${PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  veri:
