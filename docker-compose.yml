@@ -1,7 +1,8 @@
-# Tek dosya, iki ortam: test ve prod aynı makinede ayrı proje adıyla çalışır.
-#   docker compose -p talep-test --env-file deploy/test.env up -d
-#   docker compose -p talep-prod --env-file deploy/prod.env up -d
-# Yerelde imajları kaynaktan üretmek için: docker compose up -d --build
+# Test ve prod aynı makinede, ayrı proje adıyla çalışır:
+#   docker compose --env-file deploy/test.env up -d
+#   docker compose --env-file deploy/prod.env up -d
+# Yerelde kaynaktan üretmek için:
+#   docker compose -f docker-compose.yml -f docker-compose.yerel.yml up -d --build
 services:
   db:
     image: postgres:17-alpine
@@ -19,7 +20,7 @@ services:
 
   backend:
     image: ${REGISTRY:-talep}/talep-backend:${SURUM:-yerel}
-    build: ./backend
+    pull_policy: ${PULL:-missing}
     environment:
       POSTGRES_HOST: db
       POSTGRES_DB: talep
@@ -33,7 +34,7 @@ services:
 
   frontend:
     image: ${REGISTRY:-talep}/talep-frontend:${SURUM:-yerel}
-    build: ./frontend
+    pull_policy: ${PULL:-missing}
     ports:
       - "${PORT:-8080}:80"
     depends_on:

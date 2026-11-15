@@ -10,7 +10,7 @@ Eğitim sunumunda kullanılan küçük bir talep uygulaması. Bir değişikliği
 ## Yerelde çalıştırma
 
 ```
-docker compose up -d --build
+docker compose -f docker-compose.yml -f docker-compose.yerel.yml up -d --build
 ```
 
 Arayüz: http://localhost:8080
