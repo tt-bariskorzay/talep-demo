@@ -1,6 +1,7 @@
 import json
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -22,12 +23,17 @@ def talepler(request):
 
     try:
         veri = json.loads(request.body or b"{}")
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({"hata": "Geçersiz istek"}, status=400)
+    if not isinstance(veri, dict):
         return JsonResponse({"hata": "Geçersiz istek"}, status=400)
     if not str(veri.get("baslik", "")).strip():
         return JsonResponse({"hata": "Başlık zorunludur"}, status=400)
 
     talep = Talep(**{k: v for k, v in veri.items() if k in ALANLAR and v not in (None, "")})
-    talep.full_clean()
+    try:
+        talep.full_clean()
+    except ValidationError as e:
+        return JsonResponse({"hata": "Geçersiz değer", "alanlar": e.message_dict}, status=400)
     talep.save()
     return JsonResponse(talep.sozluk(), status=201)

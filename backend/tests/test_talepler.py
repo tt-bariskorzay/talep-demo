@@ -23,6 +23,11 @@ def test_basliksiz_talep_reddedilir(client):
     assert Talep.objects.count() == 0
 
 
+def test_bozuk_istek_400_doner(client):
+    yanit = client.post("/api/talepler/", bytes([0xFF, 0xFE]), content_type="application/json")
+    assert yanit.status_code == 400
+
+
 def test_talepler_listelenir(client):
     Talep.objects.create(baslik="Birinci")
     Talep.objects.create(baslik="İkinci")
