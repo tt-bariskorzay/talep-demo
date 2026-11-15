@@ -17,5 +17,6 @@ class Talep(models.Model):
             "id": self.id,
             "baslik": self.baslik,
             "aciklama": self.aciklama,
+            "oncelik": self.oncelik,
             "olusturma": self.olusturma.isoformat(),
         }
